@@ -1,16 +1,23 @@
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { JwtGuard } from 'src/guard';
+import { Body, Controller, Get, Patch, UseGuards } from '@nestjs/common';
+import { User } from '@prisma/client';
+import { GetUser } from '../auth/decorator';
+import { JwtGuard } from '../guard';
+import { EditUserDto } from './dto';
+import { UserService } from './user.service';
 
-// solve the interface 'incompatibility'
-interface UserRequest extends Request {
-  user: object;
-}
-
+@UseGuards(JwtGuard)
 @Controller('users')
 export class UserController {
-  @UseGuards(JwtGuard)
+  constructor(private userService: UserService) {}
+
   @Get('me')
-  getMe(@Req() req: UserRequest) {
-    return req.user;
+  getMe(@GetUser() user: User) {
+    return user;
+  }
+
+  @UseGuards(JwtGuard)
+  @Patch()
+  editUser(@GetUser('id') userId: number, @Body() dto: EditUserDto) {
+    return this.userService.editUser(userId, dto);
   }
 }

@@ -15,18 +15,27 @@ import { JwtGuard } from '../guard';
 import { BookmarkService } from './bookmark.service';
 import { GetUser } from '../auth/decorator';
 import { CreateBookmarkDto, EditBookmarkDto } from './dto';
+import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtGuard)
 @Controller('bookmarks')
+@UseGuards(JwtGuard)
+@ApiBearerAuth()
+@ApiTags('bookmarks')
 export class BookmarkController {
   constructor(private bookmarkService: BookmarkService) {}
 
   @Get()
+  @ApiOperation({ summary: 'Get all the bookmarks' })
+  @ApiResponse({ status: 200, description: 'Bookmarks retrieved' })
+  @ApiResponse({ status: 401, description: 'Invalid or missing token' })
   getBookmarks(@GetUser('id') userId: number) {
     return this.bookmarkService.getBookmarks(userId);
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Get a specific bookmark' })
+  @ApiResponse({ status: 200, description: 'Bookmark retrieved' })
+  @ApiResponse({ status: 401, description: 'Invalid or missing token' })
   getBookmarkById(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) bookmarkId: number,
@@ -35,6 +44,9 @@ export class BookmarkController {
   }
 
   @Post()
+  @ApiOperation({ summary: 'Create a bookmark' })
+  @ApiResponse({ status: 200, description: 'Bookmark retrieved' })
+  @ApiResponse({ status: 401, description: 'Invalid or missing token' })
   createBookmark(
     @GetUser('id') userId: number,
     @Body() dto: CreateBookmarkDto,
@@ -43,6 +55,10 @@ export class BookmarkController {
   }
 
   @Patch(':id')
+  @ApiOperation({ summary: 'Update a specific bookmark' })
+  @ApiResponse({ status: 200, description: 'Bookmarks updated' })
+  @ApiResponse({ status: 401, description: 'Invalid or missing token' })
+  @ApiResponse({ status: 403, description: "The bookmark doesn't belong to the user" })
   editBookmarkById(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) bookmarkId: number,
@@ -53,6 +69,10 @@ export class BookmarkController {
 
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':id')
+  @ApiOperation({ summary: 'Delete a specific bookmark' })
+  @ApiResponse({ status: 204, description: 'Bookmarks deleted' })
+  @ApiResponse({ status: 401, description: 'Invalid or missing token' })
+  @ApiResponse({ status: 403, description: "The bookmark doesn't belong to the user" })
   deleteBookmarkById(
     @GetUser('id') userId: number,
     @Param('id', ParseIntPipe) bookmarkId: number,
